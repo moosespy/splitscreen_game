@@ -36,7 +36,7 @@ class Player:
         self.rect = py.Rect(x, y, 20, 20)
         self.vel_x = 0
         self.vel_y = 0
-        self.speed = 5
+        self.speed = 3
         self.jump_power = -15
         self.on_ground = False
     def key_input(self):
@@ -45,7 +45,7 @@ class Player:
         if keys[py.K_LEFT]:
             self.vel_x = -1 * self.speed
         if keys[py.K_RIGHT]:
-            self.vel_x = -1 * self.speed
+            self.vel_x = self.speed
         if keys[py.K_UP] and self.on_ground:
             self.vel_y = self.jump_power
             self.on_ground = False
@@ -64,8 +64,11 @@ class Player:
             if self.rect.colliderect(platform):
                 if self.vel_y > 0:
                     self.rect.bottom = platform.top
+                    self.vel_y = 0
+                    self.on_ground = True
                 elif self.vel.y < 0:
                     self.rect.top = platform.bottom
+                    self.vel_y = 0
     def draw(self, surface, scroll_x):
         py.draw.rect(surface, red, (self.rect.x - scroll_x, self.rect.y, self.rect.width, self.rect.height))
 

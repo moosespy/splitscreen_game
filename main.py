@@ -25,6 +25,9 @@ platforms = [
     platform_surf.get_rect(center = (250, 450))
 ]
 
+for i in range(8):
+    platforms.append(platform_surf.get_rect(center = (450 + i * 200, 450 if (i + 1) % 2 == 1 else 460)))
+
 def draw_gradient(w, h, c_top, c_bottom):
     bg_surf = py.Surface((1, 2))
     bg_surf.set_at((0, 0), c_top)
@@ -57,7 +60,7 @@ class Player:
             if self.rect.colliderect(platform):
                 if self.vel_x > 0:
                     self.rect.right = platform.left
-                elif self.vel.x < 0:
+                elif self.vel_x < 0:
                     self.rect.left = platform.right
         self.rect.y += self.vel_y
         for platform in platforms:
@@ -74,6 +77,7 @@ class Player:
 
 player = Player(250, 400)
 scroll_x = 0
+level_width = 1200
 
 bg = draw_gradient(width, height/2, blue, green)
 bg_2 = draw_gradient(width, height/2, blue, green)
@@ -91,6 +95,8 @@ while run:
 
     if scroll_x < 0:
         scroll_x = 0
+    if scroll_x > level_width:
+        scroll_x = level_width
 
     screen.blit(bg, (0, 0))
     screen.blit(bg_2, (0, height/2))

@@ -8,11 +8,14 @@ screen = py.display.set_mode((width, height), py.DOUBLEBUF)
 p1_surface = py.Surface((width, height/2))
 p2_surface = py.Surface((width, height/2))
 
+font = py.font.SysFont('dejavusansmono', 16)
+
 red = [255, 0, 0]
 green = [0, 255, 0]
 blue = [0, 0, 255]
 orange = [255, 165, 0]
 black = [0, 0, 0]
+white = [255, 255, 255]
 brown = [196, 164, 132]
 
 gravity = 1
@@ -84,14 +87,17 @@ class Player:
 
 p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP}
 p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w}
-player1 = Player(250, 100, red, p1_controls)
-player2 = Player(250, 100, orange, p2_controls)
+player1 = Player(230, 100, red, p1_controls)
+player2 = Player(270, 100, orange, p2_controls)
 scroll_x1 = 0
 scroll_x2 = 0
 level_width = 1200
 
 bg = draw_gradient(width, height/2, blue, green)
 bg_2 = draw_gradient(width, height/2, blue, green)
+
+gamestate = 'playing'
+
 clock = py.time.Clock()
 run = True
 while run:
@@ -99,24 +105,48 @@ while run:
         if event.type == py.QUIT:
             run = False
 
-    player1.update(platforms)
-    player2.update(platforms)
+    if gamestate == 'playing':
+        player1.update(platforms)
+        player2.update(platforms)
 
-    target_scroll_x1 = player1.rect.x - (width // 2)
-    scroll_x1 += (target_scroll_x1 - scroll_x1) / 10
+        target_scroll_x1 = player1.rect.x - (width // 2)
+        scroll_x1 += (target_scroll_x1 - scroll_x1) / 10
 
-    if scroll_x1 < 0:
-        scroll_x1 = 0
-    if scroll_x1 > level_width:
-        scroll_x1 = level_width
+        if scroll_x1 < 0:
+            scroll_x1 = 0
+        if scroll_x1 > level_width:
+            scroll_x1 = level_width
+        if player1.rect.y >= height/2:
+            gamestate = 'p2 win'
 
-    target_scroll_x2 = player2.rect.x - (width // 2)
-    scroll_x2 += (target_scroll_x2 - scroll_x2) / 10
+        target_scroll_x2 = player2.rect.x - (width // 2)
+        scroll_x2 += (target_scroll_x2 - scroll_x2) / 10
 
-    if scroll_x2 < 0:
-        scroll_x2 = 0
-    if scroll_x2 > level_width:
-        scroll_x2 = level_width
+        if scroll_x2 < 0:
+            scroll_x2 = 0
+        if scroll_x2 > level_width:
+            scroll_x2 = level_width
+        if player2.rect.y >= height/2:
+            gamestate = 'p1 win'
+    if gamestate == 'p1 win':
+        win_text = font.render("Player 1 Wins! Press 'r' to restart.", True, white)
+        key = py.key.get_pressed()
+        if key[py.K_r] == True:
+            gamestate = 'playing'
+            player1 = Player(250, 100, red, p1_controls)
+            player2 = Player(250, 100, orange, p2_controls)
+            scroll_x1 = 0
+            scroll_x2 = 0
+    elif gamestate == 'p2 win':
+        win_text = font.render("Player 2 Wins! Press 'r' to restart.", True, white)
+        key = py.key.get_pressed()
+        if key[py.K_r] == True:
+            gamestate = 'playing'
+            player1 = Player(230, 80, red, p1_controls)
+            player2 = Player(270, 120, orange, p2_controls)
+            scroll_x1 = 0
+            scroll_x2 = 0
+
 
     p1_surface.blit(bg, (0, 0))
     for platform in platforms:
@@ -129,10 +159,10 @@ while run:
         p2_surface.blit(platform_surf, (platform.x - scroll_x2, platform.y))
     player1.draw(p2_surface, scroll_x2)
     player2.draw(p2_surface, scroll_x2)
-
     screen.blit(p1_surface, (0, 0))
     screen.blit(p2_surface, (0, height/2))
-
+    if gamestate == 'p1 win' or gamestate == 'p2 win':
+        screen.blit(win_text, (width/2 - 200, height/2))
     py.draw.rect(screen, black, (0, height/2 - 1, width, 2), width=0)
 
     py.display.flip()

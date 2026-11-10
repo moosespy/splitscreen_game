@@ -5,8 +5,8 @@ py.init()
 width = 600
 height = 500
 screen = py.display.set_mode((width, height), py.DOUBLEBUF)
-p1_surface = py.Surface((width, height/2))
-p2_surface = py.Surface((width, height/2))
+p1_surface = py.Surface((width, height/2)).convert()
+p2_surface = py.Surface((width, height/2)).convert()
 
 font = py.font.SysFont('dejavusansmono', 16)
 
@@ -23,7 +23,7 @@ gravity = 1
 def draw_platform():
     global platform_surf
     platform_points = [(0, 0), (100, 0), (100, 10), (0, 10)]
-    platform_surf = py.Surface((100, 10))
+    platform_surf = py.Surface((100, 10)).convert()
     py.draw.polygon(platform_surf, brown, platform_points)
 draw_platform()
 
@@ -38,7 +38,7 @@ def draw_gradient(w, h, c_top, c_bottom):
     bg_surf.set_at((0, 0), c_top)
     bg_surf.set_at((0, 1), c_bottom)
     grad_surf = py.transform.smoothscale(bg_surf, (w, h))
-    return grad_surf
+    return grad_surf.convert()
 class Player:
     def __init__(self, x, y, color, controls):
         self.rect = py.Rect(x, y, 18, 18)
@@ -52,6 +52,7 @@ class Player:
         self.on_ground = False
         self.color = color
         self.controls = controls
+        self.projectiles = []
     def key_input(self):
         keys = py.key.get_pressed()
         self.vel_x  = 0
@@ -64,11 +65,6 @@ class Player:
         if keys[self.controls['jump']] and self.on_ground:
             self.vel_y = self.jump_power
             self.on_ground = False
-        if keys[self.controls['shoot']]:
-            current_time = py.time.get_ticks()
-            if current_time - self.last_shot >= self.shoot_cooldown:
-                projectiles.append(Projectile(self.rect.centerx, self.rect.centery, self.facing, self.color))
-                self.last_shot = current_time
     def update(self, platforms):
         self.key_input()
         if self.vel_y > 15:
@@ -93,14 +89,20 @@ class Player:
                 elif self.vel_y < 0:
                     self.rect.top = platform.bottom
                     self.vel_y = 0
+        for projectile in self.projectiles[:]:
+            alive = projectile.update(platforms)
+            if not alive:
+                self.projectiles.remove(projectile)
     def draw(self, surface, scroll_x):
-        py.draw.rect(surface, self.color, (self.rect.x - scroll_x, self.rect.y, self.rect.width, self.rect.height))
+        py.draw.rect(surface, self.color, (round(self.rect.x - scroll_x), self.rect.y, self.rect.width, self.rect.height))
+        for projectile in self.projectiles:
+            projectile.draw(surface, scroll_x)
 
 class Projectile:
     def __init__(self, x, y, direction, color):
         self.x = float(x)
         self.y = float(y)
-        self.rect = py.Rect(int(self.x), int(self.y), 10, 1)
+        self.rect = py.Rect(int(self.x), int(self.y), 10, 2)
         self.direction = direction
         self.speed = 5
         self.color = color
@@ -118,7 +120,7 @@ class Projectile:
                 return False
         return True
     def draw(self, surface, scroll_x):
-        py.draw.rect(surface, self.color, (self.rect.x - scroll_x, self.rect.y, self.rect.width, self.rect.height))
+        py.draw.rect(surface, self.color, (round(self.x - scroll_x), self.rect.y, self.rect.width, self.rect.height))
 p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP, 'shoot': py.K_p}
 p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w, 'shoot': py.K_2}
 p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 1500, 100
@@ -128,8 +130,8 @@ scroll_x1 = 0
 scroll_x2 = 0
 level_width = 1200
 
-bg = draw_gradient(width, height/2, blue, green)
-bg_2 = draw_gradient(width, height/2, blue, green)
+bg = draw_gradient(width, height/2, blue, black)
+bg_2 = draw_gradient(width, height/2, blue, black)
 projectiles = []
 
 gamestate = 'playing'
@@ -140,7 +142,17 @@ while run:
     for event in py.event.get():
         if event.type == py.QUIT:
             run = False
-
+        if event.type == py.KEYDOWN:
+            if event.key == player1.controls['shoot']:
+                current_time = py.time.get_ticks()
+                if current_time - player1.last_shot >= player1.shoot_cooldown:
+                    player1.projectiles.append(Projectile(int(player1.rect.centerx), player1.rect.centery, player1.facing, player1.color))
+                    player1.last_shot = current_time
+            if event.key == player2.controls['shoot']:
+                current_time = py.time.get_ticks()
+                if current_time - player2.last_shot >= player2.shoot_cooldown:
+                    player2.projectiles.append(Projectile(int(player2.rect.centerx), player2.rect.centery, player2.facing, player2.color))
+                    player2.last_shot = current_time
     if gamestate == 'playing':
         player1.update(platforms)
         player2.update(platforms)
@@ -164,10 +176,6 @@ while run:
             scroll_x2 = level_width
         if player2.rect.y >= height/2:
             gamestate = 'p1 win'
-        for projectile in projectiles[:]:
-            alive = projectile.update(platforms)
-            if not alive:
-                projectiles.remove(projectile)
     if gamestate == 'p1 win':
         win_text = font.render("Player 1 Wins! Press 'r' to restart.", True, white)
         key = py.key.get_pressed()
@@ -189,21 +197,25 @@ while run:
             scroll_x2 = 0
 
 
+    intscrollx1 = int(scroll_x1)
+    intscrollx2 = int(scroll_x2)
+    
     p1_surface.blit(bg, (0, 0))
     for platform in platforms:
-        p1_surface.blit(platform_surf, (platform.x - scroll_x1, platform.y))
-    for projectile in projectiles:
-        projectile.draw(p1_surface, scroll_x1)
-    player1.draw(p1_surface, scroll_x1)
-    player2.draw(p1_surface, scroll_x1)
+        p1_surface.blit(platform_surf, (platform.x - intscrollx1, platform.y))
+    for projectile in player2.projectiles:
+        projectile.draw(p1_surface, intscrollx1)
+    player1.draw(p1_surface, intscrollx1)
+    player2.draw(p1_surface, intscrollx1)
 
     p2_surface.blit(bg_2, (0, 0))
     for platform in platforms:
-        p2_surface.blit(platform_surf, (platform.x - scroll_x2, platform.y))
-    for projectile in projectiles:
-        projectile.draw(p2_surface, scroll_x2)
-    player1.draw(p2_surface, scroll_x2)
-    player2.draw(p2_surface, scroll_x2)
+        p2_surface.blit(platform_surf, (platform.x - intscrollx2, platform.y))
+    for projectile in player1.projectiles:
+        projectile.draw(p2_surface, intscrollx2)
+    player1.draw(p2_surface, intscrollx2)
+    player2.draw(p2_surface, intscrollx2)
+
     screen.blit(p1_surface, (0, 0))
     screen.blit(p2_surface, (0, height/2))
     if gamestate == 'p1 win' or gamestate == 'p2 win':

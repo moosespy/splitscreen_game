@@ -46,6 +46,7 @@ class Player:
         self.vel_y = 0
         self.speed = 3
         self.jump_power = -14
+        self.facing = 1
         self.on_ground = False
         self.color = color
         self.controls = controls
@@ -54,11 +55,15 @@ class Player:
         self.vel_x  = 0
         if keys[self.controls['left']]:
             self.vel_x = -1 * self.speed
+            self.facing = -1
         if keys[self.controls['right']]:
             self.vel_x = self.speed
+            self.facing = 1
         if keys[self.controls['jump']] and self.on_ground:
             self.vel_y = self.jump_power
             self.on_ground = False
+        if keys[self.controls['shoot']]:
+            projectiles.append(Projectile(self.rect.centerx, self.rect.centery, self.facing, self.color))
     def update(self, platforms):
         self.key_input()
         if self.vel_y > 15:
@@ -86,8 +91,23 @@ class Player:
     def draw(self, surface, scroll_x):
         py.draw.rect(surface, self.color, (self.rect.x - scroll_x, self.rect.y, self.rect.width, self.rect.height))
 
-p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP}
-p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w}
+class Projectile:
+    def __init__(self, x, y, direction, color):
+        self.rect = py.Rect(x, y, 2, 2)
+        self.direction = direction
+        self.speed = 5
+        self.color = color
+    def update(self, platforms):
+        move = self.speed * self.direction
+        self.rect.x += move
+        for platform in platforms:
+            if self.rect.colliderect(platform):
+                return False
+        return True
+    def draw(self, surface, scroll_x):
+        py.draw.rect(surface, self.color, (self.rect.x - scroll_x, self.rect.y, self.rect.width, self.rect.height))
+p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP, 'shoot': py.K_p}
+p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w, 'shoot': py.K_2}
 p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 1500, 100
 player1 = Player(p1_startx, p1_starty, red, p1_controls)
 player2 = Player(p2_startx, p2_starty, orange, p2_controls)
@@ -97,6 +117,7 @@ level_width = 1200
 
 bg = draw_gradient(width, height/2, blue, green)
 bg_2 = draw_gradient(width, height/2, blue, green)
+projectiles = []
 
 gamestate = 'playing'
 
@@ -130,6 +151,10 @@ while run:
             scroll_x2 = level_width
         if player2.rect.y >= height/2:
             gamestate = 'p1 win'
+        for projectile in projectiles[:]:
+            alive = projectile.update(platforms)
+            if not alive:
+                projectiles.remove(projectile)
     if gamestate == 'p1 win':
         win_text = font.render("Player 1 Wins! Press 'r' to restart.", True, white)
         key = py.key.get_pressed()
@@ -153,12 +178,16 @@ while run:
     p1_surface.blit(bg, (0, 0))
     for platform in platforms:
         p1_surface.blit(platform_surf, (platform.x - scroll_x1, platform.y))
+    for projectile in projectiles:
+        projectile.draw(p1_surface, scroll_x1)
     player1.draw(p1_surface, scroll_x1)
     player2.draw(p1_surface, scroll_x1)
 
     p2_surface.blit(bg_2, (0, 0))
     for platform in platforms:
         p2_surface.blit(platform_surf, (platform.x - scroll_x2, platform.y))
+    for projectile in projectiles:
+        projectile.draw(p2_surface, scroll_x2)
     player1.draw(p2_surface, scroll_x2)
     player2.draw(p2_surface, scroll_x2)
     screen.blit(p1_surface, (0, 0))

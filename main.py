@@ -27,12 +27,11 @@ def draw_platform():
     py.draw.polygon(platform_surf, brown, platform_points)
 draw_platform()
 
-platforms = [
-    platform_surf.get_rect(center = (250, 130))
-]
+platforms = []
 
-for i in range(10):
-    platforms.append(platform_surf.get_rect(center = (450 + i * 150, 120 if (i + 1) % 2 == 1 else 110)))
+for i in range(9):
+    platforms.append(platform_surf.get_rect(center = (300 + i * 150, 120 if (i + 1) % 2 == 1 else 110)))
+    platforms.append(platform_surf.get_rect(center = (275 + i * 150, 200 if (i + 1) % 2 == 1 else 190)))
 
 def draw_gradient(w, h, c_top, c_bottom):
     bg_surf = py.Surface((1, 2))
@@ -42,11 +41,11 @@ def draw_gradient(w, h, c_top, c_bottom):
     return grad_surf
 class Player:
     def __init__(self, x, y, color, controls):
-        self.rect = py.Rect(x, y, 20, 20)
+        self.rect = py.Rect(x, y, 18, 18)
         self.vel_x = 0
         self.vel_y = 0
         self.speed = 3
-        self.jump_power = -15
+        self.jump_power = -14
         self.on_ground = False
         self.color = color
         self.controls = controls
@@ -89,7 +88,7 @@ class Player:
 
 p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP}
 p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w}
-p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 270, 100
+p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 1500, 100
 player1 = Player(p1_startx, p1_starty, red, p1_controls)
 player2 = Player(p2_startx, p2_starty, orange, p2_controls)
 scroll_x1 = 0

@@ -133,8 +133,8 @@ while run:
         key = py.key.get_pressed()
         if key[py.K_r] == True:
             gamestate = 'playing'
-            player1 = Player(250, 100, red, p1_controls)
-            player2 = Player(250, 100, orange, p2_controls)
+            player1 = Player(230, 100, red, p1_controls)
+            player2 = Player(270, 100, orange, p2_controls)
             scroll_x1 = 0
             scroll_x2 = 0
     elif gamestate == 'p2 win':
@@ -142,8 +142,8 @@ while run:
         key = py.key.get_pressed()
         if key[py.K_r] == True:
             gamestate = 'playing'
-            player1 = Player(230, 80, red, p1_controls)
-            player2 = Player(270, 120, orange, p2_controls)
+            player1 = Player(230, 100, red, p1_controls)
+            player2 = Player(270, 100, orange, p2_controls)
             scroll_x1 = 0
             scroll_x2 = 0
 

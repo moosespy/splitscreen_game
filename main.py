@@ -45,6 +45,8 @@ class Player:
         self.vel_x = 0
         self.vel_y = 0
         self.speed = 3
+        self.shoot_cooldown = 400
+        self.last_shot = 0
         self.jump_power = -14
         self.facing = 1
         self.on_ground = False
@@ -63,7 +65,10 @@ class Player:
             self.vel_y = self.jump_power
             self.on_ground = False
         if keys[self.controls['shoot']]:
-            projectiles.append(Projectile(self.rect.centerx, self.rect.centery, self.facing, self.color))
+            current_time = py.time.get_ticks()
+            if current_time - self.last_shot >= self.shoot_cooldown:
+                projectiles.append(Projectile(self.rect.centerx, self.rect.centery, self.facing, self.color))
+                self.last_shot = current_time
     def update(self, platforms):
         self.key_input()
         if self.vel_y > 15:
@@ -93,13 +98,21 @@ class Player:
 
 class Projectile:
     def __init__(self, x, y, direction, color):
-        self.rect = py.Rect(x, y, 2, 2)
+        self.x = float(x)
+        self.y = float(y)
+        self.rect = py.Rect(int(self.x), int(self.y), 10, 1)
         self.direction = direction
         self.speed = 5
         self.color = color
+        self.distance = 0
     def update(self, platforms):
+        max_distance = 400
         move = self.speed * self.direction
-        self.rect.x += move
+        self.x += move
+        self.distance += abs(move)
+        self.rect.x = int(self.x)
+        if self.distance > max_distance:
+            return False
         for platform in platforms:
             if self.rect.colliderect(platform):
                 return False
@@ -169,6 +182,7 @@ while run:
         key = py.key.get_pressed()
         if key[py.K_r] == True:
             gamestate = 'playing'
+            projectiles = []
             player1 = Player(p1_startx, p1_starty, red, p1_controls)
             player2 = Player(p2_startx, p2_starty, orange, p2_controls)
             scroll_x1 = 0

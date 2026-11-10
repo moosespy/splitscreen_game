@@ -28,11 +28,11 @@ def draw_platform():
 draw_platform()
 
 platforms = [
-    platform_surf.get_rect(center = (250, 250))
+    platform_surf.get_rect(center = (250, 130))
 ]
 
-for i in range(8):
-    platforms.append(platform_surf.get_rect(center = (450 + i * 200, 230 if (i + 1) % 2 == 1 else 240)))
+for i in range(10):
+    platforms.append(platform_surf.get_rect(center = (450 + i * 150, 120 if (i + 1) % 2 == 1 else 110)))
 
 def draw_gradient(w, h, c_top, c_bottom):
     bg_surf = py.Surface((1, 2))
@@ -65,6 +65,8 @@ class Player:
         if self.vel_y > 15:
             self.vel_y = 15
         self.vel_y += gravity
+        if self.vel_y > 10:
+            self.vel_y = 10
         self.rect.x += self.vel_x
         for platform in platforms:
             if self.rect.colliderect(platform):
@@ -87,8 +89,9 @@ class Player:
 
 p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP}
 p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w}
-player1 = Player(230, 100, red, p1_controls)
-player2 = Player(270, 100, orange, p2_controls)
+p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 270, 100
+player1 = Player(p1_startx, p1_starty, red, p1_controls)
+player2 = Player(p2_startx, p2_starty, orange, p2_controls)
 scroll_x1 = 0
 scroll_x2 = 0
 level_width = 1200
@@ -133,8 +136,8 @@ while run:
         key = py.key.get_pressed()
         if key[py.K_r] == True:
             gamestate = 'playing'
-            player1 = Player(230, 100, red, p1_controls)
-            player2 = Player(270, 100, orange, p2_controls)
+            player1 = Player(p1_startx, p1_starty, red, p1_controls)
+            player2 = Player(p2_startx, p2_starty, orange, p2_controls)
             scroll_x1 = 0
             scroll_x2 = 0
     elif gamestate == 'p2 win':
@@ -142,8 +145,8 @@ while run:
         key = py.key.get_pressed()
         if key[py.K_r] == True:
             gamestate = 'playing'
-            player1 = Player(230, 100, red, p1_controls)
-            player2 = Player(270, 100, orange, p2_controls)
+            player1 = Player(p1_startx, p1_starty, red, p1_controls)
+            player2 = Player(p2_startx, p2_starty, orange, p2_controls)
             scroll_x1 = 0
             scroll_x2 = 0
 

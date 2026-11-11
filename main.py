@@ -29,8 +29,8 @@ draw_platform()
 platforms = []
 
 for i in range(9):
-    platforms.append(platform_surf.get_rect(center = (300 + i * 150, 120 if (i + 1) % 2 == 1 else 110)))
-    platforms.append(platform_surf.get_rect(center = (275 + i * 150, 200 if (i + 1) % 2 == 1 else 190)))
+    platforms.append(platform_surf.get_rect(center = (300 + i * 150, 100)))
+    platforms.append(platform_surf.get_rect(center = (225 + i * 150, 190 if (i + 1) % 2 == 1 else 195)))
 
 def draw_gradient(w, h, c_top, c_bottom):
     bg_surf = py.Surface((1, 2))
@@ -43,7 +43,7 @@ class Player:
         self.rect = py.Rect(x, y, 18, 18)
         self.vel_x = 0
         self.vel_y = 0
-        self.speed = 3
+        self.speed = 4
         self.shoot_cooldown = 400
         self.last_shot = 0
         self.jump_power = -14

@@ -7,7 +7,7 @@ screen = py.display.set_mode((width, height), py.DOUBLEBUF)
 p1_surface = py.Surface((width, height/2)).convert()
 p2_surface = py.Surface((width, height/2)).convert()
 
-font = py.font.SysFont('dejavusansmono', 16)
+font = py.font.SysFont('dejavusansmono', 32)
 
 red = [255, 0, 0]
 green = [0, 255, 0]
@@ -99,7 +99,7 @@ class Projectile:
         self.y = float(y)
         self.rect = py.Rect(int(self.x), int(self.y), 20, 2)
         self.direction = direction
-        self.speed = 1
+        self.speed = 5
         self.color = color
         self.distance = 0
     def update(self, platforms):
@@ -150,7 +150,7 @@ while run:
                     player2.last_shot = current_time
     if gamestate == 'playing':
         counter += 1
-        if counter == 5:
+        if counter == 2:
             player1.update(platforms)
             player2.update(platforms)
             counter = 0
@@ -183,6 +183,7 @@ while run:
             gamestate = 'p1 win'
     if gamestate == 'p1 win':
         win_text = font.render("Player 1 Wins! Press 'r' to restart.", True, white)
+        win_rect = win_text.get_rect(center = (width // 2, height // 2))
         key = py.key.get_pressed()
         if key[py.K_r] == True:
             gamestate = 'playing'
@@ -192,6 +193,7 @@ while run:
             scroll_x2 = 0
     elif gamestate == 'p2 win':
         win_text = font.render("Player 2 Wins! Press 'r' to restart.", True, white)
+        win_rect = win_text.get_rect(center = (width // 2, height // 2))
         key = py.key.get_pressed()
         if key[py.K_r] == True:
             gamestate = 'playing'
@@ -234,7 +236,7 @@ while run:
     screen.blit(p1_surface, (0, 0))
     screen.blit(p2_surface, (0, height/2))
     if gamestate == 'p1 win' or gamestate == 'p2 win':
-        screen.blit(win_text, (width/2 - 200, height//2))
+        screen.blit(win_text, win_rect)
     else:
         screen.blit(health_text, health_rect)
 

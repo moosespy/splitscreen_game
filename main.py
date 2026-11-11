@@ -40,7 +40,7 @@ def draw_gradient(w, h, c_top, c_bottom):
     grad_surf = py.transform.smoothscale(bg_surf, (w, h))
     return grad_surf.convert()
 class Player:
-    def __init__(self, x, y, color, controls):
+    def __init__(self, x, y, color, controls, health):
         self.rect = py.Rect(x, y, 18, 18)
         self.vel_x = 0
         self.vel_y = 0
@@ -53,6 +53,7 @@ class Player:
         self.color = color
         self.controls = controls
         self.projectiles = []
+        self.health = health
     def key_input(self):
         keys = py.key.get_pressed()
         self.vel_x  = 0
@@ -124,8 +125,8 @@ class Projectile:
 p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP, 'shoot': py.K_p}
 p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w, 'shoot': py.K_2}
 p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 1500, 100
-player1 = Player(p1_startx, p1_starty, red, p1_controls)
-player2 = Player(p2_startx, p2_starty, orange, p2_controls)
+player1 = Player(p1_startx, p1_starty, red, p1_controls, 10)
+player2 = Player(p2_startx, p2_starty, orange, p2_controls, 10)
 scroll_x1 = 0
 scroll_x2 = 0
 level_width = 1200
@@ -181,8 +182,8 @@ while run:
         key = py.key.get_pressed()
         if key[py.K_r] == True:
             gamestate = 'playing'
-            player1 = Player(p1_startx, p1_starty, red, p1_controls)
-            player2 = Player(p2_startx, p2_starty, orange, p2_controls)
+            player1 = Player(p1_startx, p1_starty, red, p1_controls, 10)
+            player2 = Player(p2_startx, p2_starty, orange, p2_controls, 10)
             scroll_x1 = 0
             scroll_x2 = 0
     elif gamestate == 'p2 win':
@@ -191,8 +192,8 @@ while run:
         if key[py.K_r] == True:
             gamestate = 'playing'
             projectiles = []
-            player1 = Player(p1_startx, p1_starty, red, p1_controls)
-            player2 = Player(p2_startx, p2_starty, orange, p2_controls)
+            player1 = Player(p1_startx, p1_starty, red, p1_controls, 10)
+            player2 = Player(p2_startx, p2_starty, orange, p2_controls, 10)
             scroll_x1 = 0
             scroll_x2 = 0
 
@@ -205,6 +206,9 @@ while run:
         p1_surface.blit(platform_surf, (platform.x - intscrollx1, platform.y))
     for projectile in player2.projectiles:
         projectile.draw(p1_surface, intscrollx1)
+        if projectile.rect.colliderect(player1):
+            player2.projectiles.remove(projectile)
+            player1.health -= 1
     player1.draw(p1_surface, intscrollx1)
     player2.draw(p1_surface, intscrollx1)
 
@@ -213,13 +217,20 @@ while run:
         p2_surface.blit(platform_surf, (platform.x - intscrollx2, platform.y))
     for projectile in player1.projectiles:
         projectile.draw(p2_surface, intscrollx2)
+        if projectile.rect.colliderect(player2):
+            player1.projectiles.remove(projectile)
+            player2.health -= 1
     player1.draw(p2_surface, intscrollx2)
     player2.draw(p2_surface, intscrollx2)
+
+    health_text = font.render(f"Player 1 Health: {player1.health} | Player 2 Health: {player2.health}", True, white)
 
     screen.blit(p1_surface, (0, 0))
     screen.blit(p2_surface, (0, height/2))
     if gamestate == 'p1 win' or gamestate == 'p2 win':
-        screen.blit(win_text, (width/2 - 200, height/2))
+        screen.blit(win_text, (width/2 - 200, height//2))
+    else:
+        screen.blit(health_text, (width/2 - 200, height//2))
     py.draw.rect(screen, black, (0, height/2 - 1, width, 2), width=0)
 
     py.display.flip()

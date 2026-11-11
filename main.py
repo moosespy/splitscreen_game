@@ -177,6 +177,11 @@ while run:
             scroll_x2 = level_width
         if player2.rect.y >= height/2:
             gamestate = 'p1 win'
+        
+        if player1.health <= 0:
+            gamestate = 'p2 win'
+        if player2.health <= 0:
+            gamestate = 'p1 win'
     if gamestate == 'p1 win':
         win_text = font.render("Player 1 Wins! Press 'r' to restart.", True, white)
         key = py.key.get_pressed()
@@ -196,7 +201,6 @@ while run:
             player2 = Player(p2_startx, p2_starty, orange, p2_controls, 10)
             scroll_x1 = 0
             scroll_x2 = 0
-
 
     intscrollx1 = int(scroll_x1)
     intscrollx2 = int(scroll_x2)

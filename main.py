@@ -228,14 +228,14 @@ while run:
     player2.draw(p2_surface, intscrollx2)
 
     health_text = font.render(f"Player 1 Health: {player1.health} | Player 2 Health: {player2.health}", True, white)
+    health_rect = health_text.get_rect(center = (width//2, height//2))
 
     screen.blit(p1_surface, (0, 0))
     screen.blit(p2_surface, (0, height/2))
     if gamestate == 'p1 win' or gamestate == 'p2 win':
         screen.blit(win_text, (width/2 - 200, height//2))
     else:
-        screen.blit(health_text, (width/2 - 200, height//2))
-    py.draw.rect(screen, black, (0, height/2 - 1, width, 2), width=0)
+        screen.blit(health_text, health_rect)
 
     py.display.flip()
     clock.tick(60)

@@ -1,6 +1,5 @@
 import pygame as py
 import sys
-
 py.init()
 width = 600
 height = 500
@@ -81,31 +80,26 @@ class Player:
                 elif self.vel_x < 0:
                     self.rect.left = platform.right
         self.rect.y += self.vel_y
-        for platform in platforms:
-            if self.rect.colliderect(platform):
-                if self.vel_y > 0:
-                    self.rect.bottom = platform.top
-                    self.vel_y = 0
-                    self.on_ground = True
-                elif self.vel_y < 0:
-                    self.rect.top = platform.bottom
-                    self.vel_y = 0
-        for projectile in self.projectiles[:]:
-            alive = projectile.update(platforms)
-            if not alive:
-                self.projectiles.remove(projectile)
+        hit_indices = self.rect.collidelistall(platforms)
+        for index in hit_indices:
+            platform = platforms[index]
+            if self.vel_y > 0:
+                self.rect.bottom = platform.top
+                self.vel_y = 0
+                self.on_ground = True
+            elif self.vel_y < 0:
+                self.rect.top = platform.bottom
+                self.vel_y = 0
     def draw(self, surface, scroll_x):
         py.draw.rect(surface, self.color, (round(self.rect.x - scroll_x), self.rect.y, self.rect.width, self.rect.height))
-        for projectile in self.projectiles:
-            projectile.draw(surface, scroll_x)
 
 class Projectile:
     def __init__(self, x, y, direction, color):
         self.x = float(x)
         self.y = float(y)
-        self.rect = py.Rect(int(self.x), int(self.y), 10, 2)
+        self.rect = py.Rect(int(self.x), int(self.y), 20, 2)
         self.direction = direction
-        self.speed = 5
+        self.speed = 1
         self.color = color
         self.distance = 0
     def update(self, platforms):
@@ -136,27 +130,32 @@ bg_2 = draw_gradient(width, height/2, blue, black)
 projectiles = []
 
 gamestate = 'playing'
+counter = 0
 
 clock = py.time.Clock()
 run = True
 while run:
+    current_time = py.time.get_ticks()
     for event in py.event.get():
         if event.type == py.QUIT:
             run = False
         if event.type == py.KEYDOWN:
             if event.key == player1.controls['shoot']:
-                current_time = py.time.get_ticks()
                 if current_time - player1.last_shot >= player1.shoot_cooldown:
-                    player1.projectiles.append(Projectile(int(player1.rect.centerx), player1.rect.centery, player1.facing, player1.color))
+                    player1.projectiles.append(Projectile(int(player1.rect.right if player1.facing == 1 else player1.rect.left), player1.rect.centery, player1.facing, player1.color))
                     player1.last_shot = current_time
             if event.key == player2.controls['shoot']:
-                current_time = py.time.get_ticks()
                 if current_time - player2.last_shot >= player2.shoot_cooldown:
-                    player2.projectiles.append(Projectile(int(player2.rect.centerx), player2.rect.centery, player2.facing, player2.color))
+                    player2.projectiles.append(Projectile(int(player2.rect.right if player2.facing == 1 else player2.rect.left), player2.rect.centery, player2.facing, player2.color))
                     player2.last_shot = current_time
     if gamestate == 'playing':
-        player1.update(platforms)
-        player2.update(platforms)
+        counter += 1
+        if counter == 5:
+            player1.update(platforms)
+            player2.update(platforms)
+            counter = 0
+        player1.projectiles = [projectile for projectile in player1.projectiles if projectile.update(platforms)]
+        player2.projectiles = [projectile for projectile in player2.projectiles if projectile.update(platforms)]
 
         target_scroll_x1 = player1.rect.x - (width // 2)
         scroll_x1 += (target_scroll_x1 - scroll_x1) / 10
@@ -206,9 +205,11 @@ while run:
     intscrollx2 = int(scroll_x2)
     
     p1_surface.blit(bg, (0, 0))
+    p2_surface.blit(bg_2, (0, 0))
     for platform in platforms:
         p1_surface.blit(platform_surf, (platform.x - intscrollx1, platform.y))
-    for projectile in player2.projectiles:
+    for projectile in player2.projectiles[:]:
+        projectile.draw(p2_surface, intscrollx2)
         projectile.draw(p1_surface, intscrollx1)
         if projectile.rect.colliderect(player1):
             player2.projectiles.remove(projectile)
@@ -216,10 +217,10 @@ while run:
     player1.draw(p1_surface, intscrollx1)
     player2.draw(p1_surface, intscrollx1)
 
-    p2_surface.blit(bg_2, (0, 0))
     for platform in platforms:
         p2_surface.blit(platform_surf, (platform.x - intscrollx2, platform.y))
-    for projectile in player1.projectiles:
+    for projectile in player1.projectiles[:]:
+        projectile.draw(p1_surface, intscrollx1)
         projectile.draw(p2_surface, intscrollx2)
         if projectile.rect.colliderect(player2):
             player1.projectiles.remove(projectile)

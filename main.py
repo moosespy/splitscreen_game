@@ -120,6 +120,8 @@ class Projectile:
             self.height = self.height * -1
         if self.distance > max_distance:
             return False
+        if self.height > 260:
+            return False
         for platform in platforms:
             if self.rect.colliderect(platform):
                 return False
@@ -139,6 +141,9 @@ p1d, p1s, p2d, p2s = 1, 1, 1, 1
 level_width = 600
 
 player1, player2, scroll_x1, scroll_x2, gamestate, p_select = reset_game()
+
+attack1_e, attack1_s = -5, 1
+attack2_e, attack2_s = 1, 0
 
 bg = draw_gradient(width, height/2, blue, black)
 bg_2 = draw_gradient(width, height/2, blue, black)
@@ -165,11 +170,17 @@ while run:
                         player2.last_shot = current_time
                 if event.key == player1.controls['special_attack']:
                     if current_time - player1.last_shot >= player1.shoot_cooldown:
-                        player1.projectiles.append(Projectile(int(player1.rect.right if player1.facing == 1 else player1.rect.left), player1.rect.centery, player1.facing, player1.color, -5, 1))
+                        if p1s == 8:
+                            player1.projectiles.append(Projectile(int(player1.rect.right if player1.facing == 1 else player1.rect.left), player1.rect.centery, player1.facing, player1.color, attack2_e, attack2_s))
+                        if p1s == 4:
+                            player1.projectiles.append(Projectile(int(player1.rect.right if player1.facing == 1 else player1.rect.left), player1.rect.centery, player1.facing, player1.color, attack1_e, attack1_s))
                         player1.last_shot = current_time
                 if event.key == player2.controls['special_attack']:
                     if current_time - player2.last_shot >= player2.shoot_cooldown:
-                        player2.projectiles.append(Projectile(int(player2.rect.right if player2.facing == 1 else player2.rect.left), player2.rect.centery, player2.facing, player2.color, -5, 1))
+                        if p2s == 8:
+                            player2.projectiles.append(Projectile(int(player2.rect.right if player2.facing == 1 else player2.rect.left), player2.rect.centery, player2.facing, player2.color, attack2_e, attack2_s))
+                        if p2s == 4:
+                            player2.projectiles.append(Projectile(int(player2.rect.right if player2.facing == 1 else player2.rect.left), player2.rect.centery, player2.facing, player2.color, attack1_e, attack1_s))
                         player2.last_shot = current_time
             if gamestate == 'menu':
                 if event.key == py.K_1:
@@ -200,7 +211,7 @@ while run:
         if p_select == 3:
             startbutton_text = font.render("Press Here to Start Game", True, black)
         else:
-            startbutton_text = font.render("Press # of Character Choice.", True, black)
+            startbutton_text = font.render(f"Player {p_select}: Press # of Character Choice (1-2).", True, black)
         startbutton = startbutton_text.get_rect(center = (width//2, height//2))
     if gamestate == 'playing':
         counter += 1

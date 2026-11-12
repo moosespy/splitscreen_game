@@ -12,7 +12,8 @@ font = py.font.SysFont('dejavusansmono', 25)
 red = [255, 0, 0]
 green = [0, 255, 0]
 blue = [0, 0, 255]
-orange = [255, 165, 0]
+orange = [255, 85, 0]
+yellow = [255, 255, 0]
 black = [0, 0, 0]
 white = [255, 255, 255]
 brown = [196, 164, 132]
@@ -120,7 +121,7 @@ class Projectile:
 
 def reset_game():
     p1 = Player(p1_startx, p1_starty, red, p1_controls, 10, 8, 1)
-    p2 = Player(p2_startx, p2_starty, orange, p2_controls, 10, 4, 2)
+    p2 = Player(p2_startx, p2_starty, green, p2_controls, 10, 4, 2)
     return p1, p2, 0, 0, 'menu'
 p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP, 'shoot': py.K_p}
 p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w, 'shoot': py.K_2}
@@ -157,7 +158,7 @@ while run:
             if button.collidepoint(mouse_pos):
                 gamestate = 'playing'
     if gamestate == 'menu':
-        button_text = font.render("Press Here to Start Game", True, white)
+        button_text = font.render("Press Here to Start Game", True, black)
         button = button_text.get_rect(center = (width//2, height//2))
     if gamestate == 'playing':
         counter += 1
@@ -250,8 +251,10 @@ while run:
     elif gamestate == 'playing':
         screen.blit(health_text, health_rect)
     elif gamestate == 'menu':
+        button_out = button.inflate(10, 10)
+        py.draw.rect(screen, white, button_out, width=1)
+        py.draw.rect(screen, yellow, button_out)
         screen.blit(button_text, button)
-
     py.display.flip()
     clock.tick(60)
 

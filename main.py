@@ -120,18 +120,17 @@ class Projectile:
         py.draw.rect(surface, self.color, (round(self.x - scroll_x), self.rect.y, self.rect.width, self.rect.height))
 
 def reset_game():
-    p1 = Player(p1_startx, p1_starty, red, p1_controls, player1.health, player1.speed, player1.damage)
-    p2 = Player(p2_startx, p2_starty, green, p2_controls, player2.health, player2.speed, player2.damage)
+    p1 = Player(p1_startx, p1_starty, red, p1_controls, 10, p1s, p1d)
+    p2 = Player(p2_startx, p2_starty, green, p2_controls, 10, p2s, p2d)
     p_select = 1
     return p1, p2, 0, 0, 'menu', p_select
 p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP, 'shoot': py.K_p}
 p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w, 'shoot': py.K_2}
 p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 1500, 100
+p1d, p1s, p2d, p2s = 1, 1, 1, 1
 level_width = 1200
 
 player1, player2, scroll_x1, scroll_x2, gamestate, p_select = reset_game()
-
-player1.health, player1.speed, player1.damage, player2.health, player2.speed, player2.damage = 1, 1, 1, 1, 1, 1
 
 bg = draw_gradient(width, height/2, blue, black)
 bg_2 = draw_gradient(width, height/2, blue, black)
@@ -175,6 +174,7 @@ while run:
                         player2.damage = 1
                         player2.speed = 8
                         p_select = 3
+                p1d, p1s, p2d, p2s = player1.damage, player1.speed, player2.damage, player2.speed
         if event.type == py.MOUSEBUTTONDOWN:
             if gamestate == 'menu' and p_select == 3:
                 mouse_pos = py.mouse.get_pos()

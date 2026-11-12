@@ -39,11 +39,11 @@ def draw_gradient(w, h, c_top, c_bottom):
     grad_surf = py.transform.smoothscale(bg_surf, (w, h))
     return grad_surf.convert()
 class Player:
-    def __init__(self, x, y, color, controls, health):
+    def __init__(self, x, y, color, controls, health, speed, damage):
         self.rect = py.Rect(x, y, 18, 18)
         self.vel_x = 0
         self.vel_y = 0
-        self.speed = 4
+        self.speed = speed
         self.shoot_cooldown = 400
         self.last_shot = 0
         self.jump_power = -14
@@ -53,6 +53,7 @@ class Player:
         self.controls = controls
         self.projectiles = []
         self.health = health
+        self.damage = damage
     def key_input(self):
         keys = py.key.get_pressed()
         self.vel_x  = 0
@@ -116,20 +117,22 @@ class Projectile:
         return True
     def draw(self, surface, scroll_x):
         py.draw.rect(surface, self.color, (round(self.x - scroll_x), self.rect.y, self.rect.width, self.rect.height))
+
+def reset_game():
+    p1 = Player(p1_startx, p1_starty, red, p1_controls, 10, 8, 1)
+    p2 = Player(p2_startx, p2_starty, orange, p2_controls, 10, 4, 2)
+    return p1, p2, 0, 0, 'playing'
 p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP, 'shoot': py.K_p}
 p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w, 'shoot': py.K_2}
 p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 1500, 100
-player1 = Player(p1_startx, p1_starty, red, p1_controls, 10)
-player2 = Player(p2_startx, p2_starty, orange, p2_controls, 10)
-scroll_x1 = 0
-scroll_x2 = 0
 level_width = 1200
+
+player1, player2, scroll_x1, scroll_x2, gamestate = reset_game()
 
 bg = draw_gradient(width, height/2, blue, black)
 bg_2 = draw_gradient(width, height/2, blue, black)
 projectiles = []
 
-gamestate = 'playing'
 counter = 0
 
 clock = py.time.Clock()
@@ -140,14 +143,16 @@ while run:
         if event.type == py.QUIT:
             run = False
         if event.type == py.KEYDOWN:
-            if event.key == player1.controls['shoot']:
-                if current_time - player1.last_shot >= player1.shoot_cooldown:
-                    player1.projectiles.append(Projectile(int(player1.rect.right if player1.facing == 1 else player1.rect.left), player1.rect.centery, player1.facing, player1.color))
-                    player1.last_shot = current_time
-            if event.key == player2.controls['shoot']:
-                if current_time - player2.last_shot >= player2.shoot_cooldown:
-                    player2.projectiles.append(Projectile(int(player2.rect.right if player2.facing == 1 else player2.rect.left), player2.rect.centery, player2.facing, player2.color))
-                    player2.last_shot = current_time
+            if gamestate == 'playing':
+                if event.key == player1.controls['shoot']:
+                    if current_time - player1.last_shot >= player1.shoot_cooldown:
+                        player1.projectiles.append(Projectile(int(player1.rect.right if player1.facing == 1 else player1.rect.left), player1.rect.centery, player1.facing, player1.color))
+                        player1.last_shot = current_time
+                if event.key == player2.controls['shoot']:
+                    if current_time - player2.last_shot >= player2.shoot_cooldown:
+                        player2.projectiles.append(Projectile(int(player2.rect.right if player2.facing == 1 else player2.rect.left), player2.rect.centery, player2.facing, player2.color))
+                        player2.last_shot = current_time
+    
     if gamestate == 'playing':
         counter += 1
         if counter == 2:
@@ -186,22 +191,15 @@ while run:
         win_rect = win_text.get_rect(center = (width // 2, height // 2))
         key = py.key.get_pressed()
         if key[py.K_r] == True:
-            gamestate = 'playing'
-            player1 = Player(p1_startx, p1_starty, red, p1_controls, 10)
-            player2 = Player(p2_startx, p2_starty, orange, p2_controls, 10)
-            scroll_x1 = 0
-            scroll_x2 = 0
+            player1, player2, scroll_x1, scroll_x2, gamestate = reset_game()
+            projectiles = []
     elif gamestate == 'p2 win':
         win_text = font.render("Player 2 Wins! Press 'r' to restart.", True, white)
         win_rect = win_text.get_rect(center = (width // 2, height // 2))
         key = py.key.get_pressed()
         if key[py.K_r] == True:
-            gamestate = 'playing'
+            player1, player2, scroll_x1, scroll_x2, gamestate = reset_game()
             projectiles = []
-            player1 = Player(p1_startx, p1_starty, red, p1_controls, 10)
-            player2 = Player(p2_startx, p2_starty, orange, p2_controls, 10)
-            scroll_x1 = 0
-            scroll_x2 = 0
 
     intscrollx1 = int(scroll_x1)
     intscrollx2 = int(scroll_x2)
@@ -215,7 +213,7 @@ while run:
         projectile.draw(p1_surface, intscrollx1)
         if projectile.rect.colliderect(player1):
             player2.projectiles.remove(projectile)
-            player1.health -= 1
+            player1.health -= player2.damage
     player1.draw(p1_surface, intscrollx1)
     player2.draw(p1_surface, intscrollx1)
 
@@ -226,7 +224,7 @@ while run:
         projectile.draw(p2_surface, intscrollx2)
         if projectile.rect.colliderect(player2):
             player1.projectiles.remove(projectile)
-            player2.health -= 1
+            player2.health -= player1.damage
     player1.draw(p2_surface, intscrollx2)
     player2.draw(p2_surface, intscrollx2)
 

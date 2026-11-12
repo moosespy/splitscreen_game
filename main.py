@@ -96,20 +96,28 @@ class Player:
         py.draw.rect(surface, self.color, (round(self.rect.x - scroll_x), self.rect.y, self.rect.width, self.rect.height))
 
 class Projectile:
-    def __init__(self, x, y, direction, color):
+    def __init__(self, x, y, direction, color, elevation, speed):
         self.x = float(x)
         self.y = float(y)
         self.rect = py.Rect(int(self.x), int(self.y), 20, 2)
         self.direction = direction
-        self.speed = 5
+        self.speed = speed
+        self.height = elevation
         self.color = color
         self.distance = 0
+        self.elevate = 0
     def update(self, platforms):
         max_distance = 400
+        max_height = -100
         move = self.speed * self.direction
         self.x += move
+        self.y += self.height
         self.distance += abs(move)
+        self.elevate += self.height
         self.rect.x = int(self.x)
+        self.rect.y = int(self.y)
+        if self.elevate < max_height:
+            self.height = self.height * -1
         if self.distance > max_distance:
             return False
         for platform in platforms:
@@ -124,8 +132,8 @@ def reset_game():
     p2 = Player(p2_startx, p2_starty, green, p2_controls, 10, p2s, p2d)
     p_select = 1
     return p1, p2, 0, 0, 'menu', p_select
-p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP, 'shoot': py.K_p}
-p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w, 'shoot': py.K_2}
+p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP, 'shoot': py.K_o, 'special_attack': py.K_p}
+p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w, 'shoot': py.K_1, 'special_attack': py.K_2}
 p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 900, 100
 p1d, p1s, p2d, p2s = 1, 1, 1, 1
 level_width = 600
@@ -149,11 +157,19 @@ while run:
             if gamestate == 'playing':
                 if event.key == player1.controls['shoot']:
                     if current_time - player1.last_shot >= player1.shoot_cooldown:
-                        player1.projectiles.append(Projectile(int(player1.rect.right if player1.facing == 1 else player1.rect.left), player1.rect.centery, player1.facing, player1.color))
+                        player1.projectiles.append(Projectile(int(player1.rect.right if player1.facing == 1 else player1.rect.left), player1.rect.centery, player1.facing, player1.color, 0, 5))
                         player1.last_shot = current_time
                 if event.key == player2.controls['shoot']:
                     if current_time - player2.last_shot >= player2.shoot_cooldown:
-                        player2.projectiles.append(Projectile(int(player2.rect.right if player2.facing == 1 else player2.rect.left), player2.rect.centery, player2.facing, player2.color))
+                        player2.projectiles.append(Projectile(int(player2.rect.right if player2.facing == 1 else player2.rect.left), player2.rect.centery, player2.facing, player2.color, 0, 5))
+                        player2.last_shot = current_time
+                if event.key == player1.controls['special_attack']:
+                    if current_time - player1.last_shot >= player1.shoot_cooldown:
+                        player1.projectiles.append(Projectile(int(player1.rect.right if player1.facing == 1 else player1.rect.left), player1.rect.centery, player1.facing, player1.color, -5, 1))
+                        player1.last_shot = current_time
+                if event.key == player2.controls['special_attack']:
+                    if current_time - player2.last_shot >= player2.shoot_cooldown:
+                        player2.projectiles.append(Projectile(int(player2.rect.right if player2.facing == 1 else player2.rect.left), player2.rect.centery, player2.facing, player2.color, -5, 1))
                         player2.last_shot = current_time
             if gamestate == 'menu':
                 if event.key == py.K_1:
@@ -168,11 +184,11 @@ while run:
                 if event.key == py.K_2:
                     if p_select == 1:
                         player1.damage = 1
-                        player1.speed = 6
+                        player1.speed = 8
                         p_select = 2
                     elif p_select == 2:
                         player2.damage = 1
-                        player2.speed = 6
+                        player2.speed = 8
                         p_select = 3
                 p1d, p1s, p2d, p2s = player1.damage, player1.speed, player2.damage, player2.speed
         if event.type == py.MOUSEBUTTONDOWN:

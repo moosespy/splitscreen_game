@@ -29,7 +29,7 @@ draw_platform()
 
 platforms = []
 
-for i in range(9):
+for i in range(5):
     platforms.append(platform_surf.get_rect(center = (300 + i * 150, 100)))
     platforms.append(platform_surf.get_rect(center = (225 + i * 150, 190 if (i + 1) % 2 == 1 else 195)))
 
@@ -126,9 +126,9 @@ def reset_game():
     return p1, p2, 0, 0, 'menu', p_select
 p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP, 'shoot': py.K_p}
 p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w, 'shoot': py.K_2}
-p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 1500, 100
+p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 900, 100
 p1d, p1s, p2d, p2s = 1, 1, 1, 1
-level_width = 1200
+level_width = 600
 
 player1, player2, scroll_x1, scroll_x2, gamestate, p_select = reset_game()
 
@@ -168,11 +168,11 @@ while run:
                 if event.key == py.K_2:
                     if p_select == 1:
                         player1.damage = 1
-                        player1.speed = 8
+                        player1.speed = 6
                         p_select = 2
                     elif p_select == 2:
                         player2.damage = 1
-                        player2.speed = 8
+                        player2.speed = 6
                         p_select = 3
                 p1d, p1s, p2d, p2s = player1.damage, player1.speed, player2.damage, player2.speed
         if event.type == py.MOUSEBUTTONDOWN:

@@ -30,8 +30,8 @@ draw_platform()
 platforms = []
 
 for i in range(5):
-    platforms.append(platform_surf.get_rect(center = (300 + i * 150, 100)))
-    platforms.append(platform_surf.get_rect(center = (225 + i * 150, 190 if (i + 1) % 2 == 1 else 195)))
+    platforms.append(platform_surf.get_rect(center = (300 + i * 150, 150)))
+    platforms.append(platform_surf.get_rect(center = (225 + i * 150, 240 if (i + 1) % 2 == 1 else 230)))
 
 def draw_gradient(w, h, c_top, c_bottom):
     bg_surf = py.Surface((1, 2))

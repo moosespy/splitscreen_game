@@ -7,7 +7,7 @@ screen = py.display.set_mode((width, height), py.DOUBLEBUF)
 p1_surface = py.Surface((width, height/2)).convert()
 p2_surface = py.Surface((width, height/2)).convert()
 
-font = py.font.SysFont('dejavusansmono', 25)
+font = py.font.SysFont(None, 25)
 
 red = [255, 0, 0]
 green = [0, 255, 0]
@@ -120,15 +120,18 @@ class Projectile:
         py.draw.rect(surface, self.color, (round(self.x - scroll_x), self.rect.y, self.rect.width, self.rect.height))
 
 def reset_game():
-    p1 = Player(p1_startx, p1_starty, red, p1_controls, 10, 8, 1)
-    p2 = Player(p2_startx, p2_starty, green, p2_controls, 10, 4, 2)
-    return p1, p2, 0, 0, 'menu'
+    p1 = Player(p1_startx, p1_starty, red, p1_controls, player1.health, player1.speed, player1.damage)
+    p2 = Player(p2_startx, p2_starty, green, p2_controls, player2.health, player2.speed, player2.damage)
+    p_select = 1
+    return p1, p2, 0, 0, 'menu', p_select
 p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP, 'shoot': py.K_p}
 p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w, 'shoot': py.K_2}
 p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 1500, 100
 level_width = 1200
 
-player1, player2, scroll_x1, scroll_x2, gamestate = reset_game()
+player1, player2, scroll_x1, scroll_x2, gamestate, p_select = reset_game()
+
+player1.health, player1.speed, player1.damage, player2.health, player2.speed, player2.damage = 1, 1, 1, 1, 1, 1
 
 bg = draw_gradient(width, height/2, blue, black)
 bg_2 = draw_gradient(width, height/2, blue, black)
@@ -153,13 +156,36 @@ while run:
                     if current_time - player2.last_shot >= player2.shoot_cooldown:
                         player2.projectiles.append(Projectile(int(player2.rect.right if player2.facing == 1 else player2.rect.left), player2.rect.centery, player2.facing, player2.color))
                         player2.last_shot = current_time
+            if gamestate == 'menu':
+                if event.key == py.K_1:
+                    if p_select == 1:
+                        player1.damage = 2
+                        player1.speed = 4
+                        p_select = 2
+                    elif p_select == 2:
+                        player2.damage = 2
+                        player2.speed = 4
+                        p_select = 3
+                if event.key == py.K_2:
+                    if p_select == 1:
+                        player1.damage = 1
+                        player1.speed = 8
+                        p_select = 2
+                    elif p_select == 2:
+                        player2.damage = 1
+                        player2.speed = 8
+                        p_select = 3
         if event.type == py.MOUSEBUTTONDOWN:
-            mouse_pos = py.mouse.get_pos()
-            if button.collidepoint(mouse_pos):
-                gamestate = 'playing'
+            if gamestate == 'menu' and p_select == 3:
+                mouse_pos = py.mouse.get_pos()
+                if startbutton.collidepoint(mouse_pos):
+                    gamestate = 'playing'
     if gamestate == 'menu':
-        button_text = font.render("Press Here to Start Game", True, black)
-        button = button_text.get_rect(center = (width//2, height//2))
+        if p_select == 3:
+            startbutton_text = font.render("Press Here to Start Game", True, black)
+        else:
+            startbutton_text = font.render("Press # of Character Choice.", True, black)
+        startbutton = startbutton_text.get_rect(center = (width//2, height//2))
     if gamestate == 'playing':
         counter += 1
         if counter == 2:
@@ -198,7 +224,7 @@ while run:
         win_rect = win_text.get_rect(center = (width // 2, height // 2))
         key = py.key.get_pressed()
         if key[py.K_r] or key[py.K_m]:
-            player1, player2, scroll_x1, scroll_x2, gamestate = reset_game()
+            player1, player2, scroll_x1, scroll_x2, gamestate, p_select = reset_game()
             if key[py.K_r]:
                 gamestate = 'playing'
             projectiles = []
@@ -207,7 +233,7 @@ while run:
         win_rect = win_text.get_rect(center = (width // 2, height // 2))
         key = py.key.get_pressed()
         if key[py.K_r] or key[py.K_m]:
-            player1, player2, scroll_x1, scroll_x2, gamestate = reset_game()
+            player1, player2, scroll_x1, scroll_x2, gamestate, p_select = reset_game()
             if key[py.K_r]:
                 gamestate = 'playing'
             projectiles = []
@@ -251,10 +277,10 @@ while run:
     elif gamestate == 'playing':
         screen.blit(health_text, health_rect)
     elif gamestate == 'menu':
-        button_out = button.inflate(10, 10)
-        py.draw.rect(screen, white, button_out, width=1)
-        py.draw.rect(screen, yellow, button_out)
-        screen.blit(button_text, button)
+        startbutton_out = startbutton.inflate(10, 10)
+        py.draw.rect(screen, white, startbutton_out, width=1)
+        py.draw.rect(screen, yellow if p_select == 3 else red if p_select == 1 else green, startbutton_out)
+        screen.blit(startbutton_text, startbutton)
     py.display.flip()
     clock.tick(60)
 

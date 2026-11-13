@@ -34,8 +34,8 @@ platforms = [
 ]
 
 for i in range(5):
-    platforms.append(platform_surf.get_rect(center = (random.randint(250, 350) + i * random.randint(125, 175), random.randint(100, 175))))
-    platforms.append(platform_surf.get_rect(center = (random.randint(125, 175) + i * (random.randint(100, 175)), 240 if (i + 1) % 2 == 1 else 230)))
+    platforms.append(platform_surf.get_rect(center = (random.randint(250, 350) + i * random.randint(125, 175), random.randint(110, 175))))
+    platforms.append(platform_surf.get_rect(center = (random.randint(125, 175) + i * random.randint(125, 200), 240 if (i + 1) % 2 == 1 else 230)))
 
 def draw_gradient(w, h, c_top, c_bottom):
     bg_surf = py.Surface((1, 2))
@@ -151,8 +151,8 @@ level_width = 600
 
 player1, player2, scroll_x1, scroll_x2, gamestate, p_select = reset_game()
 
-attack1_e, attack1_s = -5, 1
-attack2_e, attack2_s = 1, 0
+attack1_e, attack1_s = -5, 0.5
+attack2_e, attack2_s = 0.75, 0
 attack3_e, attack3_s = 0, 10
 
 bg = draw_gradient(width, height/2, blue, black)

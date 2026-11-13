@@ -75,6 +75,10 @@ class Player:
     def update(self, platforms):
         if self.hitstop > 0:
             self.hitstop -= 1
+            if self.hitstop % 2 == 1:
+                self.rect.y += 1
+            else:
+                self.rect.y -= 1
             return
         self.key_input()
         if self.vel_y > 15:

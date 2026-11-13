@@ -1,5 +1,6 @@
 import pygame as py
 import sys
+import random
 py.init()
 width = 600
 height = 500
@@ -27,11 +28,14 @@ def draw_platform():
     py.draw.polygon(platform_surf, brown, platform_points)
 draw_platform()
 
-platforms = []
+platforms = [
+    platform_surf.get_rect(center = (225, 240)),
+    platform_surf.get_rect(center = (900, 150))
+]
 
 for i in range(5):
-    platforms.append(platform_surf.get_rect(center = (300 + i * 150, 150)))
-    platforms.append(platform_surf.get_rect(center = (225 + i * 150, 240 if (i + 1) % 2 == 1 else 230)))
+    platforms.append(platform_surf.get_rect(center = (random.randint(250, 350) + i * random.randint(125, 175), random.randint(100, 175))))
+    platforms.append(platform_surf.get_rect(center = (random.randint(125, 175) + i * (random.randint(100, 175)), 240 if (i + 1) % 2 == 1 else 230)))
 
 def draw_gradient(w, h, c_top, c_bottom):
     bg_surf = py.Surface((1, 2))
@@ -113,8 +117,6 @@ class Projectile:
             max_distance = 100
         else:
             max_distance = 100
-        print(self.speed)
-        print(self.height)
         max_height = -100
         move = self.speed * self.direction
         self.x += move

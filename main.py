@@ -157,7 +157,6 @@ attack3_e, attack3_s = 0, 10
 
 bg = draw_gradient(width, height/2, blue, black)
 bg_2 = draw_gradient(width, height/2, blue, black)
-projectiles = []
 
 counter = 0
 
@@ -277,7 +276,8 @@ while run:
             player1, player2, scroll_x1, scroll_x2, gamestate, p_select = reset_game()
             if key[py.K_r]:
                 gamestate = 'playing'
-            projectiles = []
+            player1.projectiles = []
+            player2.projectiles = []
     elif gamestate == 'p2 win':
         win_text = font.render("Player 2 Wins! Press 'r' to restart. Press 'm' to go to the menu.", True, white)
         win_rect = win_text.get_rect(center = (width // 2, height // 2))
@@ -286,7 +286,8 @@ while run:
             player1, player2, scroll_x1, scroll_x2, gamestate, p_select = reset_game()
             if key[py.K_r]:
                 gamestate = 'playing'
-            projectiles = []
+            player1.projectiles = []
+            player2.projectiles = []
 
     intscrollx1 = int(scroll_x1)
     intscrollx2 = int(scroll_x2)

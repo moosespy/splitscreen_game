@@ -57,6 +57,7 @@ class Player:
         self.color = color
         self.controls = controls
         self.projectiles = []
+        self.hitstop = 0
         self.health = health
         self.damage = damage
     def key_input(self):
@@ -72,6 +73,9 @@ class Player:
             self.vel_y = self.jump_power
             self.on_ground = False
     def update(self, platforms):
+        if self.hitstop > 0:
+            self.hitstop -= 1
+            return
         self.key_input()
         if self.vel_y > 15:
             self.vel_y = 15
@@ -116,7 +120,7 @@ class Projectile:
         elif abs(self.speed) == attack3_s and self.height == attack3_e:
             max_distance = 100
         else:
-            max_distance = 100
+            max_distance = 1000
         max_height = -100
         move = self.speed * self.direction
         self.x += move
@@ -127,6 +131,7 @@ class Projectile:
         self.rect.y = int(self.y)
         if self.elevate < max_height:
             self.height = self.height * -1
+            self.speed = random.randint(50, 100) * self.speed
         if self.distance > max_distance:
             return False
         if self.height > 260:
@@ -151,7 +156,7 @@ level_width = 600
 
 player1, player2, scroll_x1, scroll_x2, gamestate, p_select = reset_game()
 
-attack1_e, attack1_s = -5, 0.5
+attack1_e, attack1_s = -5, 0.1
 attack2_e, attack2_s = 0.75, 0
 attack3_e, attack3_s = 0, 10
 
@@ -302,6 +307,7 @@ while run:
         if projectile.rect.colliderect(player1):
             player2.projectiles.remove(projectile)
             player1.health -= player2.damage
+            player1.hitstop = 1 + 2 * player2.damage
     if gamestate != 'menu':
         player1.draw(p1_surface, intscrollx1)
         player2.draw(p1_surface, intscrollx1)
@@ -314,6 +320,7 @@ while run:
         if projectile.rect.colliderect(player2):
             player1.projectiles.remove(projectile)
             player2.health -= player1.damage
+            player2.hitstop = 1 + 5 * player1.damage
     if gamestate != 'menu':
         player1.draw(p2_surface, intscrollx2)
         player2.draw(p2_surface, intscrollx2)

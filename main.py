@@ -76,9 +76,9 @@ class Player:
         if self.hitstop > 0:
             self.hitstop -= 1
             if self.hitstop % 2 == 1:
-                self.rect.y += 1
+                self.rect.y += self.hitstop
             else:
-                self.rect.y -= 1
+                self.rect.y -= self.hitstop
             return
         self.key_input()
         if self.vel_y > 15:
@@ -154,12 +154,12 @@ def reset_game():
     return p1, p2, 0, 0, 'menu', p_select
 p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP, 'shoot': py.K_o, 'special_attack': py.K_p}
 p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w, 'shoot': py.K_1, 'special_attack': py.K_2}
+level_width = 600
+fp = 0
+
 p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 900, 100
 p1d, p1s, p2d, p2s = 1, 1, 1, 1
-level_width = 600
-
 player1, player2, scroll_x1, scroll_x2, gamestate, p_select = reset_game()
-
 attack1_e, attack1_s = -5, 0.1
 attack2_e, attack2_s = 0.75, 0
 attack3_e, attack3_s = 0, 10
@@ -252,7 +252,10 @@ while run:
             counter = 0
         player1.projectiles = [projectile for projectile in player1.projectiles if projectile.update(platforms)]
         player2.projectiles = [projectile for projectile in player2.projectiles if projectile.update(platforms)]
-
+        if fp == 1:
+            falling_projectiles = []
+            falling_projectiles.append(Projectile(random.randint(0, 1200), 0, random.uniform(-0.5, 0.5), orange, 1, 1))
+        falling_projectiles = [projectile for projectile in falling_projectiles if projectile.update(platforms)]
         target_scroll_x1 = player1.rect.x - (width // 2)
         scroll_x1 += (target_scroll_x1 - scroll_x1) / 10
 
@@ -325,6 +328,19 @@ while run:
             player1.projectiles.remove(projectile)
             player2.health -= player1.damage
             player2.hitstop = 1 + 5 * player1.damage
+    if gamestate == 'playing':
+        for projectile in falling_projectiles[:]:
+            projectile.draw(p1_surface, intscrollx1)
+            projectile.draw(p2_surface, intscrollx2)
+            if projectile.rect.colliderect(player1):
+                falling_projectiles.remove(projectile)
+                player1.health -= 1
+                player1.hitstop = 6
+            if projectile.rect.colliderect(player2):
+                falling_projectiles.remove(projectile)
+                player2.health -= 1
+                player2.hitstop = 6
+    
     if gamestate != 'menu':
         player1.draw(p2_surface, intscrollx2)
         player2.draw(p2_surface, intscrollx2)

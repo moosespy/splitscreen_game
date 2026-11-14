@@ -122,7 +122,7 @@ class Projectile:
         if self.speed == 5 and abs(self.height) == 0:
             max_distance = 400
         elif abs(self.speed) == attack3_s and self.height == attack3_e:
-            max_distance = 100
+            max_distance = 150
         else:
             max_distance = 1000
         max_height = -100
@@ -162,7 +162,7 @@ p1d, p1s, p2d, p2s = 1, 1, 1, 1
 player1, player2, scroll_x1, scroll_x2, gamestate, p_select = reset_game()
 attack1_e, attack1_s = -5, 0.1
 attack2_e, attack2_s = 0.75, 0
-attack3_e, attack3_s = 0, 10
+attack3_e, attack3_s = 0, 15
 
 bg = draw_gradient(width, height/2, blue, black)
 bg_2 = draw_gradient(width, height/2, blue, black)
@@ -252,7 +252,7 @@ while run:
             counter = 0
         player1.projectiles = [projectile for projectile in player1.projectiles if projectile.update(platforms)]
         player2.projectiles = [projectile for projectile in player2.projectiles if projectile.update(platforms)]
-        if fp == 1:
+        if fp == 0:
             falling_projectiles = []
             falling_projectiles.append(Projectile(random.randint(0, 1200), 0, random.uniform(-0.5, 0.5), orange, 1, 1))
         falling_projectiles = [projectile for projectile in falling_projectiles if projectile.update(platforms)]

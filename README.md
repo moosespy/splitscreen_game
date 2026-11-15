@@ -16,9 +16,16 @@ Every player also has their own unique attack, allowing them to try different th
 # Controls
 Player 1 uses arrow keys to move, 'o' for basic attack, and 'p' for special attack. Player 2 uses wasd to move, '1' for basic attack, and '2' for special attack.
 
+# Other Features
+As I mentioned, the map randomly generates itself at the beginning of every game - but only when you first run the program, it doesn't do it every time you restart or go back to the menu screen. 
+
+When a player is hit, they stall for a bit and vibrate up and down. This is a hitstop, an intentional feature, not a bug despite the fact that it may look like one (sorry if it looks like it glitches)
+
 # Closing Notes
-New things I learned in this project include: the jumping mechanism, scrolling features, splitscreen (two surfaces), 2-player implementation, object-oriented programming (player and projectile classes), how to effectively use attributes like health, daamage, etc., clickable buttons, character selection, and projectiles that spawn in player position and also at the top of the screen. Probably more things, but these are the main ones. Also that Terra doesn't accept 11,000 character-long demo links...
+New things I learned in this project include: the jumping mechanism, scrolling features, splitscreen (two surfaces), 2-player implementation, object-oriented programming (player and projectile classes), how to effectively use attributes like health, daamage, etc., clickable buttons, character selection, hitstops, and projectiles that spawn in player position and also at the top of the screen. Probably more things, but these are the main ones. Also that Terra doesn't accept 11,000 character-long demo links...
 
 This is made in pygame for the Hack Club program Terra, and this is my third pygame project ever, with the other two also being for Terra!
 
-Demo link is here: https://codehs.com/sandbox/trana0357/splitscreen-game/run. Thanks for playing!
+Demo link is here: https://codehs.com/sandbox/trana0357/splitscreen-game/run. Thanks for playing! 
+
+Please note that the game does look a lot better in pythoncompiler.io, where I tested the project, but unfortunately the demo links for that website are... long. Too long. I accept partial blame for the code not being highly efficient, but codehs also just isn't a great compiler, but it's the only one I could find that has a demo link.

@@ -76,9 +76,9 @@ class Player:
         if self.hitstop > 0:
             self.hitstop -= 1
             if self.hitstop % 2 == 1:
-                self.rect.y += self.hitstop
-            else:
                 self.rect.y -= self.hitstop
+            else:
+                self.rect.y += self.hitstop
             return
         self.key_input()
         if self.vel_y > 15:
@@ -156,6 +156,8 @@ p1_controls = {'left': py.K_LEFT, 'right': py.K_RIGHT, 'jump': py.K_UP, 'shoot':
 p2_controls = {'left': py.K_a, 'right': py.K_d, 'jump': py.K_w, 'shoot': py.K_1, 'special_attack': py.K_2}
 level_width = 600
 fp = 0
+fpr = 50
+falling_projectiles = []
 
 p1_startx, p1_starty, p2_startx, p2_starty = 230, 100, 900, 100
 p1d, p1s, p2d, p2s = 1, 1, 1, 1
@@ -252,9 +254,13 @@ while run:
             counter = 0
         player1.projectiles = [projectile for projectile in player1.projectiles if projectile.update(platforms)]
         player2.projectiles = [projectile for projectile in player2.projectiles if projectile.update(platforms)]
-        if fp == 0:
-            falling_projectiles = []
-            falling_projectiles.append(Projectile(random.randint(0, 1200), 0, random.uniform(-0.5, 0.5), orange, 1, 1))
+        if fp <= 0:
+            falling_projectiles.append(Projectile(random.randint(0, 1200), 0, random.uniform(-0.5, 0.5), yellow, 1, 1))
+            fp = fpr
+            if fpr > 1:
+                fpr -= 0.33
+        else:
+            fp -= 1
         falling_projectiles = [projectile for projectile in falling_projectiles if projectile.update(platforms)]
         target_scroll_x1 = player1.rect.x - (width // 2)
         scroll_x1 += (target_scroll_x1 - scroll_x1) / 10
@@ -290,6 +296,8 @@ while run:
                 gamestate = 'playing'
             player1.projectiles = []
             player2.projectiles = []
+            fp = 0
+            fpr = 50
     elif gamestate == 'p2 win':
         win_text = font.render("Player 2 Wins! Press 'r' to restart. Press 'm' to go to the menu.", True, white)
         win_rect = win_text.get_rect(center = (width // 2, height // 2))
@@ -300,6 +308,8 @@ while run:
                 gamestate = 'playing'
             player1.projectiles = []
             player2.projectiles = []
+            fp = 0
+            fpr = 75
 
     intscrollx1 = int(scroll_x1)
     intscrollx2 = int(scroll_x2)
